@@ -104,6 +104,7 @@ class GreenCityNegativeRegistrationTest {
         typePassword("1234567");
         typeConfirm("1234567");
         clickSignUp();
+
         Thread.sleep(2000);
 
         assertPasswordErrorVisible();
@@ -117,6 +118,7 @@ class GreenCityNegativeRegistrationTest {
         typePassword("1 2345678Aa!");
         typeConfirm("1 2345678Aa!");
         clickSignUp();
+        
         Thread.sleep(2000);
 
         assertPasswordErrorVisible();
@@ -130,6 +132,7 @@ class GreenCityNegativeRegistrationTest {
         typePassword("12345678Aa!");
         typeConfirm("2345678Aa!");
         clickSignUp();
+
         Thread.sleep(2000);
 
         assertConfirmPasswordErrorVisible();
