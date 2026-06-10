@@ -90,6 +90,7 @@ class GreenCityNegativeRegistrationTest {
         findAndClickWebElementById("firstName");
         typePassword("12345678Aa!");
         typeConfirm("12345678Aa!");
+
         Thread.sleep(2000);
 
         assertUsernameErrorVisible();
