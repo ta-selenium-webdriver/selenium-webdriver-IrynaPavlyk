@@ -98,8 +98,6 @@ class GreenCityNegativeRegistrationTest {
     @Test
     @DisplayName("Short password (<8) → password rule error")
     void shouldShowErrorForShortPassword() throws InterruptedException {
-        // TODO:
-        // Enter a password like "123" and check for the error
         typeEmail("iruska.m21@gmail.com");
         typeUsername("Nikolas K");
         typePassword("1234567");
