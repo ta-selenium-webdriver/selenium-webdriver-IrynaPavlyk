@@ -7,10 +7,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import org.openqa.selenium.chrome.ChromeOptions;
-import java.time.Duration;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class GreenCityNegativeRegistrationTest {
     private static WebDriver driver;
@@ -25,7 +23,7 @@ class GreenCityNegativeRegistrationTest {
             options.addArguments("--disable-dev-shm-usage");
             options.addArguments("--window-size=1920,1080");
         }
-        
+
         driver = WebDriverManager.chromedriver().capabilities(options).create();
         driver.manage().window().maximize();
         // At this stage, we are not using complex waits, so we just maximize the window
@@ -35,7 +33,7 @@ class GreenCityNegativeRegistrationTest {
     void openRegistrationForm() throws InterruptedException {
         // 1. Open the main page
         driver.navigate().to("https://www.greencity.cx.ua/#/greenCity");
-        
+
         // Bad practice: using a delay to allow the page to load completely.
         // This is necessary because the site may load slowly.
         Thread.sleep(5000);
@@ -70,18 +68,31 @@ class GreenCityNegativeRegistrationTest {
     @Test
     @DisplayName("All fields empty → required errors shown")
     void shouldShowErrorsForAllEmptyFields() throws InterruptedException {
-        // TODO:
-        // 1. Click each field or try to click Sign Up
-        // 2. Check assertEmailErrorVisible(), assertUsernameErrorVisible(), etc.
+        findAndClickWebElementById("email");
+        findAndClickWebElementById("firstName");
+        findAndClickWebElementById("password");
+        findAndClickWebElementById("repeatPassword");
+
+        clickSignUp();
+
+        Thread.sleep(3000);
+
+        assertEmailErrorVisible();
+        assertUsernameErrorVisible();
+        assertPasswordErrorVisible();
+        assertConfirmPasswordErrorVisible();
     }
 
     @Test
     @DisplayName("Empty username → username required")
     void shouldShowErrorForEmptyUsername() throws InterruptedException {
-        // TODO:
-        // 1. Enter valid email and passwords
-        // 2. Leave username empty (or click and leave)
-        // 3. assertUsernameErrorVisible()
+        typeEmail("iruska.m21@gmail.com");
+        findAndClickWebElementById("firstName");
+        typePassword("12345678Aa!");
+        typeConfirm("12345678Aa!");
+        Thread.sleep(2000);
+
+        assertUsernameErrorVisible();
     }
 
     @Test
@@ -89,18 +100,40 @@ class GreenCityNegativeRegistrationTest {
     void shouldShowErrorForShortPassword() throws InterruptedException {
         // TODO:
         // Enter a password like "123" and check for the error
+        typeEmail("iruska.m21@gmail.com");
+        typeUsername("Nikolas K");
+        typePassword("1234567");
+        typeConfirm("1234567");
+        clickSignUp();
+        Thread.sleep(2000);
+
+        assertPasswordErrorVisible();
     }
 
     @Test
     @DisplayName("Password with space → password rule error")
     void shouldShowErrorForPasswordWithSpace() throws InterruptedException {
-        // Check a specific password validation rule
+        typeEmail("iruska.m21@gmail.com");
+        typeUsername("Nikolas K");
+        typePassword("1 2345678Aa!");
+        typeConfirm("1 2345678Aa!");
+        clickSignUp();
+        Thread.sleep(2000);
+
+        assertPasswordErrorVisible();
     }
 
     @Test
     @DisplayName("Confirm password mismatch → confirm error")
     void shouldShowErrorForPasswordMismatch() throws InterruptedException {
-        // Enter different passwords in the Password and Confirm Password fields
+        typeEmail("iruska.m21@gmail.com");
+        typeUsername("Nikolas K");
+        typePassword("12345678Aa!");
+        typeConfirm("2345678Aa!");
+        clickSignUp();
+        Thread.sleep(2000);
+
+        assertConfirmPasswordErrorVisible();
     }
 
     // --- HELPERS (Helper methods) ---
@@ -138,17 +171,45 @@ class GreenCityNegativeRegistrationTest {
         WebElement error = driver.findElement(By.id("email-err-msg"));
         assertTrue(error.isDisplayed(), "Email error message should be visible");
         // contains("required") or other text to avoid dependency on the full phrase
-        assertTrue(error.getText().toLowerCase().contains("check") || error.getText().toLowerCase().contains("correctly"));
+        assertTrue(
+                error.getText().toLowerCase().contains("check") ||
+                        error.getText().toLowerCase().contains("correctly") ||
+                        error.getText().toLowerCase().contains("email"));
     }
 
     private void assertUsernameErrorVisible() {
-        // Find the error element for the username (id may differ, check on the site)
-        // For example: driver.findElement(By.xpath("//input[@id='firstName']/following-sibling::div"))
+        WebElement nameInputError = driver.findElement(By.cssSelector("app-error[controlname='firstName'] div"));
+
+        assertTrue(nameInputError.isDisplayed(), "Email error message should be visible");
+        assertTrue(nameInputError.getText().toLowerCase().contains("user name"),
+                "The text error does not correspond to first name field");
+    }
+
+    private void assertPasswordErrorVisible() {
+        WebElement passwordError = driver.findElement(By.cssSelector("p.password-not-valid"));
+
+        assertTrue(passwordError.isDisplayed(), "Email error message should be visible");
+        assertTrue(passwordError.getText().toLowerCase().contains("password"),
+                "The text error does not correspond to password field");
+    }
+
+    private void assertConfirmPasswordErrorVisible() {
+        WebElement passwordConfirmError = driver.findElement(By.cssSelector("div#confirm-err-msg div"));
+
+        assertTrue(passwordConfirmError.isDisplayed(), "Email error message should be visible");
+        assertTrue(passwordConfirmError.getText().toLowerCase().contains("required") ||
+                        passwordConfirmError.getText().toLowerCase().contains("match"),
+                "The text error does not correspond to  repeat password field");
     }
 
     private void assertSignUpButtonDisabled() {
         WebElement btn = driver.findElement(By.cssSelector("button[type='submit'].greenStyle"));
         assertFalse(btn.isEnabled(), "The 'Sign Up' button should be disabled with invalid data");
+    }
+
+    private void findAndClickWebElementById(String element) {
+        WebElement webelement = driver.findElement(By.id(element));
+        webelement.click();
     }
 
     @AfterAll
